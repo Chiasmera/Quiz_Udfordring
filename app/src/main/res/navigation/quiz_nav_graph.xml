@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/quiz_nav_graph"
+    app:startDestination="@id/categoryListFragment">
+
+    <fragment
+        android:id="@+id/categoryListFragment"
+        android:name="com.chiasmera.quizudfordring.CategoryListFragment"
+        android:label="fragment_category_list"
+        tools:layout="@layout/fragment_category_list" >
+        <action
+            android:id="@+id/action_categoryListFragment_to_questionFragment"
+            app:destination="@id/questionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/questionFragment"
+        android:name="com.chiasmera.quizudfordring.QuestionFragment"
+        android:label="fragment_question"
+        tools:layout="@layout/fragment_question" >
+        <argument
+            android:name="questionArray"
+            app:argType="com.chiasmera.quizudfordring.Question[]" />
+        <action
+            android:id="@+id/action_questionFragment_self"
+            app:destination="@id/questionFragment" />
+        <action
+            android:id="@+id/action_questionFragment_to_categoryListFragment"
+            app:destination="@id/categoryListFragment" />
+        <argument
+            android:name="index"
+            app:argType="integer" />
+    </fragment>
+</navigation>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Quiz Udfordring</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="categories">Categories</string>
+    <string name="next_question">Next Question</string>
+</resources>
