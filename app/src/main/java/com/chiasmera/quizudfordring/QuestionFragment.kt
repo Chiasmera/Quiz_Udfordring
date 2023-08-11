@@ -1,23 +1,18 @@
 package com.chiasmera.quizudfordring
 
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.RequiresApi
-import androidx.core.os.BundleCompat.getParcelableArray
-import androidx.core.view.children
+import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import com.chiasmera.quizudfordring.databinding.FragmentCategoryListBinding
 import com.chiasmera.quizudfordring.databinding.FragmentQuestionBinding
-import java.util.Collections.addAll
 
-
+/**
+ * Fragment showing a question and possible answers
+ */
 class QuestionFragment : Fragment() {
     private var _binding: FragmentQuestionBinding? = null
     private val binding get() = _binding!!
@@ -35,29 +30,32 @@ class QuestionFragment : Fragment() {
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //Arguments recieved on navigation. A list of questions and the index of the current question in the list
         val index = arguments?.getInt("index")
-        val questions = arguments?.getParcelableArray("questionArray")
+        val questions = arguments?.getParcelableArray("questionArray") as Array<Question>
 
-
+        //If arguments are null somehow, navigate back to categories
         if (index == null || questions == null || questions.isEmpty()) {
             val action = QuestionFragmentDirections.actionQuestionFragmentToCategoryListFragment()
             view.findNavController().navigate(action)
         } else {
-            val currentQuestion = questions[index] as Question
+            val currentQuestion = questions[index]
 
+            //Setting the question text
             binding.questionView.text = currentQuestion.question
 
-            val randomIndex =
-                Math.floor(Math.random() * (currentQuestion.wrongAnswers.size + 1)).toInt()
+            //Randomizing an index for the correct answer, as it should not be in a predicable position on screen
+            val randomIndex = Math.floor(Math.random() * (currentQuestion.wrongAnswers.size + 1)).toInt()
 
+            //List of ALL answers, both right and wrong, with the correct in the random position.
             val answers: MutableList<String> = mutableListOf<String>()
             answers.addAll(currentQuestion.wrongAnswers)
             answers.add(randomIndex, currentQuestion.correctAnswer)
 
+            //Creates a button for each answer, giving it a listener that checks for correctness and changes background color accordingly
             for (answer in answers) {
                 val button = Button(activity)
                 button.text = answer
@@ -67,13 +65,16 @@ class QuestionFragment : Fragment() {
                     } else {
                         button.setBackgroundColor(Color.RED)
                     }
-                    toggleButtons()
+                    //Toggles the "next" button to true upon any answer
+                    answerSelected()
                 }
 
                 binding.answerView.addView(button)
             }
 
+            //the "next" button is disabled until any answer is clicked
             binding.nextButton.isEnabled = false
+            //onclick listener navigating either to the next question, or back to categories if this was the last question in the list
             binding.nextButton.setOnClickListener {
                 if (index < questions.size - 1) {
                     val action =
@@ -87,6 +88,7 @@ class QuestionFragment : Fragment() {
                 }
             }
 
+            //onclick listener for the "categories" button. Navigates back to all categories
             binding.homeButton.setOnClickListener {
                 val action = QuestionFragmentDirections.actionQuestionFragmentToCategoryListFragment()
                 view.findNavController().navigate(action)
@@ -95,8 +97,13 @@ class QuestionFragment : Fragment() {
     }
 
 
-    fun toggleButtons() {
-        //disables all buttons when one answer is given. Useful if only one answer is allowed
+    /**
+     * Performs any required actions upon the user selecting an answer, such as enabling/disabling buttons
+     */
+    fun answerSelected() {
+        //unused code that disallows choosing more than one answer.
+        //I have chosen for the app to allow you to choose as many options as you want.
+        // Another option could be to allow only for one answer, in which case you would disable the other buttons as below
 //        for (answerButton in binding.answerView.children) {
 //            answerButton.isEnabled = false
 //        }

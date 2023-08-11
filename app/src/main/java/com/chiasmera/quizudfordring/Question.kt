@@ -3,6 +3,9 @@ package com.chiasmera.quizudfordring
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+/**
+ * Represents a question in the quiz, including possible answers and metadata for difficulty and type
+ */
 @Parcelize
 data class Question (
     val category : String,

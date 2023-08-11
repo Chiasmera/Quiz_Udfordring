@@ -1,8 +1,5 @@
 package com.chiasmera.quizudfordring
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
 /**
  * Represents a category of quiz questions
  */
@@ -14,13 +11,6 @@ data class Category (
     var easyCount : Int = 0
     var mediumCount : Int = 0
     var hardCount : Int = 0
-
-    /**
-     * Returns a JSON String representation of this Category
-     */
-    fun toJSONObject() : String {
-            return "{\"id\":\"${id}\",\"name\":\"${name}\"}"
-    }
 
     override fun toString(): String {
         return name

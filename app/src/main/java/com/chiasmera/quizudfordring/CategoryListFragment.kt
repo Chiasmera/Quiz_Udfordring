@@ -163,6 +163,7 @@ class CategoryListFragment : Fragment() {
                 )
                 Toast.makeText(context, "Something went wrong!",Toast.LENGTH_SHORT).show()
             }
+            connection.disconnect()
 
         }
 
@@ -174,6 +175,7 @@ class CategoryListFragment : Fragment() {
      */
     suspend fun fetchCategories(categorySet: MutableSet<Category>) {
         withContext(Dispatchers.IO) {
+            //HTMl GET request that returns all categories from API
             val connection: HttpURLConnection =
                 URL("https://opentdb.com/api_category.php").openConnection() as HttpURLConnection
             connection.connect()
@@ -182,19 +184,21 @@ class CategoryListFragment : Fragment() {
                 val bufferedReader = BufferedReader(InputStreamReader(connection.inputStream))
                 val result = bufferedReader.readLine().trimIndent()
 
+                //Parses response JSON to a JSON array of categories
                 val parsed = JSONObject(result)
                 val parsedArray = parsed.getJSONArray("trivia_categories")
-                for (i in 0 until parsedArray.length()) {
-                    val currentCategory = parsedArray.getJSONObject(i)
-                    val id = currentCategory.getInt("id")
-                    val fullName = currentCategory.getString("name")
-                    val name = fullName
 
-                    val category = Category(id, name)
-                    fetchQuestionCountForCategory(category)
-                    categorySet.add(category)
+                for (i in 0 until parsedArray.length()) {
+                    categorySet.add(
+                        parseJSONToCategory(
+                            parsedArray.getJSONObject(i)
+                        )
+                    )
                 }
             } else {
+                //Should handle other status codes from the HTML response (but doesn't right now)
+                //Proper handling would include throwing an error, then catching it and possibly showing the user
+                // a (useful) messageallowing them to either try again or choose another category
                 Log.e(
                     TAG,
                     "Failed to fetch categories. Error code: ${connection.responseCode} (${connection.responseMessage})"
@@ -209,6 +213,7 @@ class CategoryListFragment : Fragment() {
      */
     suspend fun fetchQuestionCountForCategory(category: Category) {
         withContext(Dispatchers.IO) {
+            //HTML GET's the amount of questions in this category for each difficulty
             val url = URL("https://opentdb.com/api_count.php?category=${category.id}")
             val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
             connection.connect()
@@ -226,20 +231,35 @@ class CategoryListFragment : Fragment() {
     }
 
     /**
+     * Parses a JSON object representation of a category to a Category object
+     * @param jsonCategory JSON String representing a category, as recieved from API
+     * @return a Category object
+     */
+    private suspend fun parseJSONToCategory (jsonCategory : JSONObject) : Category {
+        val id = jsonCategory.getInt("id")
+        val name = jsonCategory.getString("name")
+        val category = Category(id, name)
+        //Fills out maximum amount of questions for the category
+        fetchQuestionCountForCategory(category)
+
+        return category
+    }
+
+    /**
      * Parses a JSON representation of a question to a Question object
      * @param jsonObject a JSON object representing a question
      * @return a Question object
      */
-    private fun parseJSONToQuestion (jsonObject : JSONObject) : Question {
+    private fun parseJSONToQuestion (jsonQuestion : JSONObject) : Question {
         //I had trouble with encoding. Only thing that ended up working was parsing each value seperately.
         // There is propablæy a smarter way out there
-        val category = Html.fromHtml(jsonObject.getString("category"), FROM_HTML_MODE_LEGACY).toString()
-        val type = Html.fromHtml(jsonObject.getString("type"), FROM_HTML_MODE_LEGACY).toString()
-        val difficulty = Html.fromHtml(jsonObject.getString("difficulty"), FROM_HTML_MODE_LEGACY).toString()
-        val question = Html.fromHtml(jsonObject.getString("question"), FROM_HTML_MODE_LEGACY).toString()
-        val correct = Html.fromHtml(jsonObject.getString("correct_answer"), FROM_HTML_MODE_LEGACY).toString()
+        val category = Html.fromHtml(jsonQuestion.getString("category"), FROM_HTML_MODE_LEGACY).toString()
+        val type = Html.fromHtml(jsonQuestion.getString("type"), FROM_HTML_MODE_LEGACY).toString()
+        val difficulty = Html.fromHtml(jsonQuestion.getString("difficulty"), FROM_HTML_MODE_LEGACY).toString()
+        val question = Html.fromHtml(jsonQuestion.getString("question"), FROM_HTML_MODE_LEGACY).toString()
+        val correct = Html.fromHtml(jsonQuestion.getString("correct_answer"), FROM_HTML_MODE_LEGACY).toString()
         //Incorrects answers gets parsed to a List of Strings
-        val incorrectJsonArray = jsonObject.getJSONArray("incorrect_answers")
+        val incorrectJsonArray = jsonQuestion.getJSONArray("incorrect_answers")
         val incorrect = mutableListOf<String>()
         for (i in 0 until incorrectJsonArray.length()) {
             incorrect.add(
