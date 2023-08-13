@@ -38,7 +38,7 @@ class QuestionFragment : Fragment() {
         val questions = arguments?.getParcelableArray("questionArray") as Array<Question>
 
         //If arguments are null somehow, navigate back to categories
-        if (index == null || questions == null || questions.isEmpty()) {
+        if (index == null || questions.isEmpty()) {
             val action = QuestionFragmentDirections.actionQuestionFragmentToCategoryListFragment()
             view.findNavController().navigate(action)
         } else {

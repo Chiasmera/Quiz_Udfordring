@@ -96,22 +96,33 @@ class CategoryListFragment : Fragment() {
 
             //onClick listener that fetches question for the given category and difficulty, then navigates to the first question
             button.setOnClickListener {
-                var questionArray: Array<Question>
-
-                val fragment = this
-                lifecycleScope.launch {
-                    questionArray = fetchQuestions(category, difficulty)
-
-                    val action = CategoryListFragmentDirections.actionCategoryListFragmentToQuestionFragment(
-                        questionArray = questionArray,
-                        index = 0)
-                    NavHostFragment.findNavController(fragment).navigate(action)
-                }
-
+                onCategorySelected(category, difficulty)
             }
 
             binding.categoryListView.addView(button)
         }
+    }
+
+    /**
+     * fetches questions for the given category and difficulty, then navigates to the first question
+     * @param category Category selected by the user
+     * @param difficulty currently selected difficulty as a String
+     */
+    fun onCategorySelected(category: Category, difficulty: String) {
+        var questionArray: Array<Question>
+
+        lifecycleScope.launch {
+            questionArray = fetchQuestions(category, difficulty)
+
+            val action = CategoryListFragmentDirections.actionCategoryListFragmentToQuestionFragment(
+                questionArray = questionArray,
+                index = 0)
+            NavHostFragment.findNavController(requireParentFragment()).navigate(action)
+        }
+    }
+
+    private fun onCategorySelected () {
+
     }
 
     /**
