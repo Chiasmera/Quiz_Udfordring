@@ -108,7 +108,7 @@ class CategoryListFragment : Fragment() {
      * @param category Category selected by the user
      * @param difficulty currently selected difficulty as a String
      */
-    fun onCategorySelected(category: Category, difficulty: String) {
+    private fun onCategorySelected(category: Category, difficulty: String) {
         var questionArray: Array<Question>
 
         lifecycleScope.launch {
@@ -121,9 +121,6 @@ class CategoryListFragment : Fragment() {
         }
     }
 
-    private fun onCategorySelected () {
-
-    }
 
     /**
      * GET's questions from the API for the given category and difficulty and returns an array of Questions
